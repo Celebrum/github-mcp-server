@@ -14,7 +14,7 @@ import (
 )
 
 // GetPullRequest creates a tool to get details of a specific pull request.
-func GetPullRequest(client *github.Client, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
+func GetPullRequest(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("get_pull_request",
 			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_DESCRIPTION", "Get details of a specific pull request")),
 			mcp.WithString("owner",
@@ -44,6 +44,10 @@ func GetPullRequest(client *github.Client, t translations.TranslationHelperFunc)
 				return mcp.NewToolResultError(err.Error()), nil
 			}
 
+			client, err := getClient(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get GitHub client: %w", err)
+			}
 			pr, resp, err := client.PullRequests.Get(ctx, owner, repo, pullNumber)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get pull request: %w", err)
@@ -68,7 +72,7 @@ func GetPullRequest(client *github.Client, t translations.TranslationHelperFunc)
 }
 
 // UpdatePullRequest creates a tool to update an existing pull request.
-func UpdatePullRequest(client *github.Client, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
+func UpdatePullRequest(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("update_pull_request",
 			mcp.WithDescription(t("TOOL_UPDATE_PULL_REQUEST_DESCRIPTION", "Update an existing pull request in a GitHub repository")),
 			mcp.WithString("owner",
@@ -157,6 +161,10 @@ func UpdatePullRequest(client *github.Client, t translations.TranslationHelperFu
 				return mcp.NewToolResultError("No update parameters provided."), nil
 			}
 
+			client, err := getClient(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get GitHub client: %w", err)
+			}
 			pr, resp, err := client.PullRequests.Edit(ctx, owner, repo, pullNumber, update)
 			if err != nil {
 				return nil, fmt.Errorf("failed to update pull request: %w", err)
@@ -181,7 +189,7 @@ func UpdatePullRequest(client *github.Client, t translations.TranslationHelperFu
 }
 
 // ListPullRequests creates a tool to list and filter repository pull requests.
-func ListPullRequests(client *github.Client, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
+func ListPullRequests(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("list_pull_requests",
 			mcp.WithDescription(t("TOOL_LIST_PULL_REQUESTS_DESCRIPTION", "List and filter repository pull requests")),
 			mcp.WithString("owner",
@@ -255,6 +263,10 @@ func ListPullRequests(client *github.Client, t translations.TranslationHelperFun
 				},
 			}
 
+			client, err := getClient(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get GitHub client: %w", err)
+			}
 			prs, resp, err := client.PullRequests.List(ctx, owner, repo, opts)
 			if err != nil {
 				return nil, fmt.Errorf("failed to list pull requests: %w", err)
@@ -279,7 +291,7 @@ func ListPullRequests(client *github.Client, t translations.TranslationHelperFun
 }
 
 // MergePullRequest creates a tool to merge a pull request.
-func MergePullRequest(client *github.Client, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
+func MergePullRequest(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("merge_pull_request",
 			mcp.WithDescription(t("TOOL_MERGE_PULL_REQUEST_DESCRIPTION", "Merge a pull request")),
 			mcp.WithString("owner",
@@ -335,6 +347,10 @@ func MergePullRequest(client *github.Client, t translations.TranslationHelperFun
 				MergeMethod: mergeMethod,
 			}
 
+			client, err := getClient(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get GitHub client: %w", err)
+			}
 			result, resp, err := client.PullRequests.Merge(ctx, owner, repo, pullNumber, commitMessage, options)
 			if err != nil {
 				return nil, fmt.Errorf("failed to merge pull request: %w", err)
@@ -359,7 +375,7 @@ func MergePullRequest(client *github.Client, t translations.TranslationHelperFun
 }
 
 // GetPullRequestFiles creates a tool to get the list of files changed in a pull request.
-func GetPullRequestFiles(client *github.Client, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
+func GetPullRequestFiles(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("get_pull_request_files",
 			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_FILES_DESCRIPTION", "Get the list of files changed in a pull request")),
 			mcp.WithString("owner",
@@ -389,6 +405,10 @@ func GetPullRequestFiles(client *github.Client, t translations.TranslationHelper
 				return mcp.NewToolResultError(err.Error()), nil
 			}
 
+			client, err := getClient(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get GitHub client: %w", err)
+			}
 			opts := &github.ListOptions{}
 			files, resp, err := client.PullRequests.ListFiles(ctx, owner, repo, pullNumber, opts)
 			if err != nil {
@@ -414,7 +434,7 @@ func GetPullRequestFiles(client *github.Client, t translations.TranslationHelper
 }
 
 // GetPullRequestStatus creates a tool to get the combined status of all status checks for a pull request.
-func GetPullRequestStatus(client *github.Client, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
+func GetPullRequestStatus(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("get_pull_request_status",
 			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_STATUS_DESCRIPTION", "Get the combined status of all status checks for a pull request")),
 			mcp.WithString("owner",
@@ -444,6 +464,10 @@ func GetPullRequestStatus(client *github.Client, t translations.TranslationHelpe
 				return mcp.NewToolResultError(err.Error()), nil
 			}
 			// First get the PR to find the head SHA
+			client, err := getClient(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get GitHub client: %w", err)
+			}
 			pr, resp, err := client.PullRequests.Get(ctx, owner, repo, pullNumber)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get pull request: %w", err)
@@ -483,7 +507,7 @@ func GetPullRequestStatus(client *github.Client, t translations.TranslationHelpe
 }
 
 // UpdatePullRequestBranch creates a tool to update a pull request branch with the latest changes from the base branch.
-func UpdatePullRequestBranch(client *github.Client, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
+func UpdatePullRequestBranch(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("update_pull_request_branch",
 			mcp.WithDescription(t("TOOL_UPDATE_PULL_REQUEST_BRANCH_DESCRIPTION", "Update a pull request branch with the latest changes from the base branch")),
 			mcp.WithString("owner",
@@ -524,6 +548,10 @@ func UpdatePullRequestBranch(client *github.Client, t translations.TranslationHe
 				opts.ExpectedHeadSHA = github.Ptr(expectedHeadSHA)
 			}
 
+			client, err := getClient(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get GitHub client: %w", err)
+			}
 			result, resp, err := client.PullRequests.UpdateBranch(ctx, owner, repo, pullNumber, opts)
 			if err != nil {
 				// Check if it's an acceptedError. An acceptedError indicates that the update is in progress,
@@ -553,7 +581,7 @@ func UpdatePullRequestBranch(client *github.Client, t translations.TranslationHe
 }
 
 // GetPullRequestComments creates a tool to get the review comments on a pull request.
-func GetPullRequestComments(client *github.Client, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
+func GetPullRequestComments(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("get_pull_request_comments",
 			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_COMMENTS_DESCRIPTION", "Get the review comments on a pull request")),
 			mcp.WithString("owner",
@@ -589,6 +617,10 @@ func GetPullRequestComments(client *github.Client, t translations.TranslationHel
 				},
 			}
 
+			client, err := getClient(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get GitHub client: %w", err)
+			}
 			comments, resp, err := client.PullRequests.ListComments(ctx, owner, repo, pullNumber, opts)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get pull request comments: %w", err)
@@ -612,8 +644,178 @@ func GetPullRequestComments(client *github.Client, t translations.TranslationHel
 		}
 }
 
+// AddPullRequestReviewComment creates a tool to add a review comment to a pull request.
+func AddPullRequestReviewComment(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
+	return mcp.NewTool("add_pull_request_review_comment",
+			mcp.WithDescription(t("TOOL_ADD_PULL_REQUEST_COMMENT_DESCRIPTION", "Add a review comment to a pull request")),
+			mcp.WithString("owner",
+				mcp.Required(),
+				mcp.Description("Repository owner"),
+			),
+			mcp.WithString("repo",
+				mcp.Required(),
+				mcp.Description("Repository name"),
+			),
+			mcp.WithNumber("pull_number",
+				mcp.Required(),
+				mcp.Description("Pull request number"),
+			),
+			mcp.WithString("body",
+				mcp.Required(),
+				mcp.Description("The text of the review comment"),
+			),
+			mcp.WithString("commit_id",
+				mcp.Description("The SHA of the commit to comment on. Required unless in_reply_to is specified."),
+			),
+			mcp.WithString("path",
+				mcp.Description("The relative path to the file that necessitates a comment. Required unless in_reply_to is specified."),
+			),
+			mcp.WithString("subject_type",
+				mcp.Description("The level at which the comment is targeted, 'line' or 'file'"),
+				mcp.Enum("line", "file"),
+			),
+			mcp.WithNumber("line",
+				mcp.Description("The line of the blob in the pull request diff that the comment applies to. For multi-line comments, the last line of the range"),
+			),
+			mcp.WithString("side",
+				mcp.Description("The side of the diff to comment on. Can be LEFT or RIGHT"),
+				mcp.Enum("LEFT", "RIGHT"),
+			),
+			mcp.WithNumber("start_line",
+				mcp.Description("For multi-line comments, the first line of the range that the comment applies to"),
+			),
+			mcp.WithString("start_side",
+				mcp.Description("For multi-line comments, the starting side of the diff that the comment applies to. Can be LEFT or RIGHT"),
+				mcp.Enum("LEFT", "RIGHT"),
+			),
+			mcp.WithNumber("in_reply_to",
+				mcp.Description("The ID of the review comment to reply to. When specified, only body is required and all other parameters are ignored"),
+			),
+		),
+		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			owner, err := requiredParam[string](request, "owner")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			repo, err := requiredParam[string](request, "repo")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			pullNumber, err := RequiredInt(request, "pull_number")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			body, err := requiredParam[string](request, "body")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+
+			client, err := getClient(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get GitHub client: %w", err)
+			}
+
+			// Check if this is a reply to an existing comment
+			if replyToFloat, ok := request.Params.Arguments["in_reply_to"].(float64); ok {
+				// Use the specialized method for reply comments due to inconsistency in underlying go-github library: https://github.com/google/go-github/pull/950
+				commentID := int64(replyToFloat)
+				createdReply, resp, err := client.PullRequests.CreateCommentInReplyTo(ctx, owner, repo, pullNumber, body, commentID)
+				if err != nil {
+					return nil, fmt.Errorf("failed to reply to pull request comment: %w", err)
+				}
+				defer func() { _ = resp.Body.Close() }()
+
+				if resp.StatusCode != http.StatusCreated {
+					respBody, err := io.ReadAll(resp.Body)
+					if err != nil {
+						return nil, fmt.Errorf("failed to read response body: %w", err)
+					}
+					return mcp.NewToolResultError(fmt.Sprintf("failed to reply to pull request comment: %s", string(respBody))), nil
+				}
+
+				r, err := json.Marshal(createdReply)
+				if err != nil {
+					return nil, fmt.Errorf("failed to marshal response: %w", err)
+				}
+
+				return mcp.NewToolResultText(string(r)), nil
+			}
+
+			// This is a new comment, not a reply
+			// Verify required parameters for a new comment
+			commitID, err := requiredParam[string](request, "commit_id")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			path, err := requiredParam[string](request, "path")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+
+			comment := &github.PullRequestComment{
+				Body:     github.Ptr(body),
+				CommitID: github.Ptr(commitID),
+				Path:     github.Ptr(path),
+			}
+
+			subjectType, err := OptionalParam[string](request, "subject_type")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			if subjectType != "file" {
+				line, lineExists := request.Params.Arguments["line"].(float64)
+				startLine, startLineExists := request.Params.Arguments["start_line"].(float64)
+				side, sideExists := request.Params.Arguments["side"].(string)
+				startSide, startSideExists := request.Params.Arguments["start_side"].(string)
+
+				if !lineExists {
+					return mcp.NewToolResultError("line parameter is required unless using subject_type:file"), nil
+				}
+
+				comment.Line = github.Ptr(int(line))
+				if sideExists {
+					comment.Side = github.Ptr(side)
+				}
+				if startLineExists {
+					comment.StartLine = github.Ptr(int(startLine))
+				}
+				if startSideExists {
+					comment.StartSide = github.Ptr(startSide)
+				}
+
+				if startLineExists && !lineExists {
+					return mcp.NewToolResultError("if start_line is provided, line must also be provided"), nil
+				}
+				if startSideExists && !sideExists {
+					return mcp.NewToolResultError("if start_side is provided, side must also be provided"), nil
+				}
+			}
+
+			createdComment, resp, err := client.PullRequests.CreateComment(ctx, owner, repo, pullNumber, comment)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create pull request comment: %w", err)
+			}
+			defer func() { _ = resp.Body.Close() }()
+
+			if resp.StatusCode != http.StatusCreated {
+				respBody, err := io.ReadAll(resp.Body)
+				if err != nil {
+					return nil, fmt.Errorf("failed to read response body: %w", err)
+				}
+				return mcp.NewToolResultError(fmt.Sprintf("failed to create pull request comment: %s", string(respBody))), nil
+			}
+
+			r, err := json.Marshal(createdComment)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal response: %w", err)
+			}
+
+			return mcp.NewToolResultText(string(r)), nil
+		}
+}
+
 // GetPullRequestReviews creates a tool to get the reviews on a pull request.
-func GetPullRequestReviews(client *github.Client, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
+func GetPullRequestReviews(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("get_pull_request_reviews",
 			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_REVIEWS_DESCRIPTION", "Get the reviews on a pull request")),
 			mcp.WithString("owner",
@@ -643,6 +845,10 @@ func GetPullRequestReviews(client *github.Client, t translations.TranslationHelp
 				return mcp.NewToolResultError(err.Error()), nil
 			}
 
+			client, err := getClient(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get GitHub client: %w", err)
+			}
 			reviews, resp, err := client.PullRequests.ListReviews(ctx, owner, repo, pullNumber, nil)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get pull request reviews: %w", err)
@@ -667,7 +873,7 @@ func GetPullRequestReviews(client *github.Client, t translations.TranslationHelp
 }
 
 // CreatePullRequestReview creates a tool to submit a review on a pull request.
-func CreatePullRequestReview(client *github.Client, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
+func CreatePullRequestReview(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("create_pull_request_review",
 			mcp.WithDescription(t("TOOL_CREATE_PULL_REQUEST_REVIEW_DESCRIPTION", "Create a review on a pull request")),
 			mcp.WithString("owner",
@@ -835,6 +1041,10 @@ func CreatePullRequestReview(client *github.Client, t translations.TranslationHe
 				reviewRequest.Comments = comments
 			}
 
+			client, err := getClient(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get GitHub client: %w", err)
+			}
 			review, resp, err := client.PullRequests.CreateReview(ctx, owner, repo, pullNumber, reviewRequest)
 			if err != nil {
 				return nil, fmt.Errorf("failed to create pull request review: %w", err)
@@ -859,7 +1069,7 @@ func CreatePullRequestReview(client *github.Client, t translations.TranslationHe
 }
 
 // CreatePullRequest creates a tool to create a new pull request.
-func CreatePullRequest(client *github.Client, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
+func CreatePullRequest(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("create_pull_request",
 			mcp.WithDescription(t("TOOL_CREATE_PULL_REQUEST_DESCRIPTION", "Create a new pull request in a GitHub repository")),
 			mcp.WithString("owner",
@@ -942,6 +1152,10 @@ func CreatePullRequest(client *github.Client, t translations.TranslationHelperFu
 			newPR.Draft = github.Ptr(draft)
 			newPR.MaintainerCanModify = github.Ptr(maintainerCanModify)
 
+			client, err := getClient(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get GitHub client: %w", err)
+			}
 			pr, resp, err := client.PullRequests.Create(ctx, owner, repo, newPR)
 			if err != nil {
 				return nil, fmt.Errorf("failed to create pull request: %w", err)
